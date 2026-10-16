@@ -66,7 +66,7 @@ CCMenuItemSpriteExtra* EditorPage::addButton(Cursor& c, std::string const& text,
     sprite->setScale(scale);
     sprite->setCascadeOpacityEnabled(true);
 
-    auto button = geode::CCMenuItemExt::createSpriteExtra(sprite, [callback = std::move(onClick)](CCMenuItemSpriteExtra*) {
+    auto button = CCMenuItemExt::createSpriteExtra(sprite, [callback = std::move(onClick)](CCMenuItemSpriteExtra*) {
         if (callback) callback();
     });
     button->setAnchorPoint({0, .5f});
