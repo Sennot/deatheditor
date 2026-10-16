@@ -80,6 +80,11 @@ public:
     static Result<> deleteLevelStats(const std::string& levelKey);
     static Result<> deleteBackup(const std::string& levelKey, long long backupName);
     static Result<> deleteAllSessions(const std::string& levelKey);
+    // delete a single session file (Ok if it doesn't exist)
+    static Result<> deleteSession(const std::string& levelKey, long long sessionTime);
+    // synchronous backup of a level (general + metadata + all sessions), used by Editor Mode so the
+    // backup is guaranteed to exist before the first edit. returns the backup name
+    static Result<long long> createBackupNow(const std::string& levelKey);
 
     static Result<> convertV2SaveToV3(const std::string& levelKey);
     static std::vector<std::string> allV2FileLevelKeys();

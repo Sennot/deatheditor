@@ -1,16 +1,13 @@
 {
 	"geode": "5.10.1",
 	"gd": {
-        "android": "2.2081",
-        "win": "2.2081",
-		"mac": "2.2081",
-		"ios": "2.2081"
+        "win": "2.2081"
     },
-	"id": "elohmrow.death_tracker",
-	"name": "Death Tracker",
-	"version": "v3.0.9",
-	"developer": "abb2k",
-	"description": "Tracks your deaths at every percentage",
+	"id": "sennot.death_tracker_editor",
+	"name": "Death Tracker Editor",
+	"version": "v3.1.0",
+	"developer": "Sennot",
+	"description": "Death Tracker fork (Windows) with an Editor Mode: edit attempts, deaths, runs, new bests, sessions and playtime",
 	"links": {
 		"source": "https://github.com/abb2k/death-tracker",
 		"community": "https://discord.gg/8VTdWXghA6"
@@ -76,6 +73,50 @@
 			"type": "string",
 			"default": "12-hour",
 			"one-of": ["12-hour", "24-hour"]
+		},
+		"editor-title":{
+			"type": "title",
+			"name": "Editor Mode"
+		},
+		"editor-mode": {
+			"name": "Editor Mode",
+			"description": "Unlocks the <cy>Edit</c>, <cy>GD</c>, <cy>Sessions</c> and <cy>Check</c> tabs in the level options so you can change <cr>any</c> stat of a level (deaths, runs, new bests, sessions, playtime, GD attempts and best %).\nGD attempts / best % are written to the <cr>real level</c>, so they also change without the mod.\nA backup is made before editing.",
+			"type": "bool",
+			"default": false
+		},
+		"editor-link-gd-attempts": {
+			"name": "Link GD Attempts",
+			"description": "Adding/removing a from-0 death also adds/removes the same amount of <cy>GD attempts</c>. GD attempts never go below the deaths Death Tracker has.",
+			"type": "bool",
+			"default": true,
+			"enable-if": "editor-mode"
+		},
+		"editor-sync-gd-best": {
+			"name": "Sync GD Best %",
+			"description": "Adding a death above the GD best % raises the GD best % (and its new-best list). A 100% death is never written to GD, so the level is not marked as beaten.",
+			"type": "bool",
+			"default": true,
+			"enable-if": "editor-mode"
+		},
+		"editor-runs-count-as-attempts": {
+			"name": "Runs Count As Attempts",
+			"description": "Adding/removing a run (practice / mid-level) also changes GD attempts.",
+			"type": "bool",
+			"default": false,
+			"enable-if": "editor-mode"
+		},
+		"editor-auto-backup": {
+			"name": "Backup Before Editing",
+			"description": "Creates a Death Tracker backup the first time you edit a level after opening its options.",
+			"type": "bool",
+			"default": true,
+			"enable-if": "editor-mode"
+		},
+		"editor-share-original-saves": {
+			"name": "Use Original Death Tracker Saves",
+			"description": "If the original Death Tracker has a save folder and <cy>Save Path</c> is left at its default, this fork reads and writes that folder so your existing data carries over.",
+			"type": "bool",
+			"default": true
 		},
 		"bakcups-title":{
 			"type": "title",

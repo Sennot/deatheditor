@@ -1,5 +1,16 @@
 # Changelog
 
+## v3.1.0 (Death Tracker Editor)
+- Windows-only fork of Death Tracker with a new <cy>Editor Mode</c> (mod settings)
+- Editor Mode replaces the Modify tab with the <cy>Edit</c>, <cy>GD</c>, <cy>Sessions</c> and <cy>Check</c> tabs
+- edit deaths, runs and new bests in the lifetime totals or inside a single session
+- adding a death also adds a <cy>GD attempt</c> and raises the <cy>GD best %</c> when it is a new best (both can be turned off)
+- <cy>GD attempts</c>, best % and practice best % are written to the real level, so they change without the mod too
+- create, move and delete sessions, edit playtime
+- strict checks: sessions never exceed the lifetime totals, GD attempts never go below the deaths Death Tracker has, new bests always have a death
+- <cy>Check</c> tab: verify, auto-fix, undo and backups. A backup is made before the first edit
+- uses the original Death Tracker's save folder if it exists, so your data carries over
+
 ## v3.0.9
 - fixed a bug where the first run after opening a level when not playing from 0 will not track for no reason
 - fixed deleting save data while inside of a level causing data corruption

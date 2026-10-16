@@ -9,6 +9,9 @@
 #include <nodes/optionNodes/SaveOptions.hpp>
 #include <nodes/optionNodes/SectionOptions.hpp>
 #include <nodes/optionNodes/SessionOptions.hpp>
+#include <nodes/optionNodes/EditorPages.hpp>
+#include <editor/EditorManager.hpp>
+#include <utils/Settings.hpp>
 
 DTLevelSpecificSettingsLayer* DTLevelSpecificSettingsLayer::create() {
     auto popup = new DTLevelSpecificSettingsLayer;
@@ -28,9 +31,15 @@ bool DTLevelSpecificSettingsLayer::init() {
 
     this->setTitle("Level Options", "goldFont.fnt", .8f, 15);
 
+    // Editor Mode replaces the Modify tab with the Edit / GD / Sessions / Check tabs. There are more
+    // tabs then, so the labels are smaller and the "|" separators are dropped to keep one row
+    const bool editorMode = Settings::getEditorMode();
+    const float tabScale = editorMode ? .72f : .85f;
+    if (editorMode) EditorManager::resetSession();
+
     auto pages = CCMenu::create();
     pages->setLayout(RowLayout::create()
-        ->setGap(15)
+        ->setGap(editorMode ? 12 : 15)
         ->setGrowCrossAxis(true)
         ->setCrossAxisOverflow(false)
     );
@@ -50,17 +59,30 @@ bool DTLevelSpecificSettingsLayer::init() {
     optionUnderline->setContentHeight(1);
     m_mainLayer->addChild(optionUnderline);
 
-    auto firstOption = DTLevelSpecificSettingsLayer::createPageBtn("Run", RunOptions::create(ccp(m_size.width - 10, seperator->getPositionY() - 10)));
+    auto pageSize = ccp(m_size.width - 10, seperator->getPositionY() - 10);
+    auto addSeperator = [&]() {
+        if (!editorMode) pages->addChild(DTLevelSpecificSettingsLayer::createSeperator());
+    };
+
+    auto firstOption = DTLevelSpecificSettingsLayer::createPageBtn("Run", RunOptions::create(pageSize), tabScale);
 
     pages->addChild(firstOption);
-    pages->addChild(DTLevelSpecificSettingsLayer::createSeperator());
-    pages->addChild(DTLevelSpecificSettingsLayer::createPageBtn("Modify", ModifyOptions::create(ccp(m_size.width - 10, seperator->getPositionY() - 10))));
-    pages->addChild(DTLevelSpecificSettingsLayer::createSeperator());
-    pages->addChild(DTLevelSpecificSettingsLayer::createPageBtn("Save", SaveOptions::create(ccp(m_size.width - 10, seperator->getPositionY() - 10))));
-    pages->addChild(DTLevelSpecificSettingsLayer::createSeperator());
-    pages->addChild(DTLevelSpecificSettingsLayer::createPageBtn("Link", LinkOptions::create(ccp(m_size.width - 10, seperator->getPositionY() - 10))));
-    pages->addChild(DTLevelSpecificSettingsLayer::createSeperator());
-    pages->addChild(DTLevelSpecificSettingsLayer::createPageBtn("Section", SectionOptions::create(ccp(m_size.width - 10, seperator->getPositionY() - 10))));
+    if (editorMode) {
+        pages->addChild(DTLevelSpecificSettingsLayer::createPageBtn("Edit", EditorEditPage::create(pageSize), tabScale));
+        pages->addChild(DTLevelSpecificSettingsLayer::createPageBtn("GD", EditorGdPage::create(pageSize), tabScale));
+        pages->addChild(DTLevelSpecificSettingsLayer::createPageBtn("Sessions", EditorSessionsPage::create(pageSize), tabScale));
+        pages->addChild(DTLevelSpecificSettingsLayer::createPageBtn("Check", EditorCheckPage::create(pageSize), tabScale));
+    }
+    else {
+        addSeperator();
+        pages->addChild(DTLevelSpecificSettingsLayer::createPageBtn("Modify", ModifyOptions::create(pageSize), tabScale));
+    }
+    addSeperator();
+    pages->addChild(DTLevelSpecificSettingsLayer::createPageBtn("Save", SaveOptions::create(pageSize), tabScale));
+    addSeperator();
+    pages->addChild(DTLevelSpecificSettingsLayer::createPageBtn("Link", LinkOptions::create(pageSize), tabScale));
+    addSeperator();
+    pages->addChild(DTLevelSpecificSettingsLayer::createPageBtn("Section", SectionOptions::create(pageSize), tabScale));
     // pages->addChild(DTLevelSpecificSettingsLayer::createSeperator());
     // pages->addChild(DTLevelSpecificSettingsLayer::createPageBtn("Session", SessionOptions::create(ccp(m_size.width - 10, seperator->getPositionY() - 10))));
 
@@ -72,10 +94,10 @@ bool DTLevelSpecificSettingsLayer::init() {
     return true;
 }
 
-CCNode* DTLevelSpecificSettingsLayer::createPageBtn(const std::string& text, OptionsNode* page){
+CCNode* DTLevelSpecificSettingsLayer::createPageBtn(const std::string& text, OptionsNode* page, float scale){
 
     auto spr = CCLabelBMFont::create(text.c_str(), "gjFont17.fnt", 50);
-    spr->setScale(.85f);
+    spr->setScale(scale);
     auto button = CCMenuItemSpriteExtra::create(
         spr,
         this,

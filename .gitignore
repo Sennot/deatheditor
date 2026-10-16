@@ -53,3 +53,8 @@ build-*/
 
 # clangd
 .cache/
+
+# Editor tests
+tests/build/
+*.pdb
+*.ilk

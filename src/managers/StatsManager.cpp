@@ -907,6 +907,63 @@ Result<> StatsManager::deleteBackup(const std::string& levelKey, long long backu
     return Err("Cant delete backup because level save file does not exist: " + geode::utils::string::pathToString(levelSaveFilePath));
 }
 
+Result<> StatsManager::deleteSession(const std::string& levelKey, long long sessionTime){
+    auto sessionFilePath = getSavesFolderPath() / levelKey / StatsManager::SESSIONS_DIR_NAME / (std::to_string(sessionTime) + ".dt");
+
+    std::error_code ec;
+    if (!std::filesystem::exists(sessionFilePath, ec)) return Ok();
+
+    std::filesystem::remove(sessionFilePath, ec);
+    if (ec) return Err("Failed to delete session {}: {}", sessionTime, ec.message());
+
+    return Ok();
+}
+
+Result<long long> StatsManager::createBackupNow(const std::string& levelKey){
+    std::error_code ec;
+    auto levelPath = getSavesFolderPath() / levelKey;
+    if (!std::filesystem::is_directory(levelPath, ec)) return Err("No level data to back up");
+
+    auto backupName = StatsManager::getNowSeconds();
+    auto backupPath = levelPath / StatsManager::BACKUPS_DIR_NAME / std::to_string(backupName);
+
+    std::filesystem::create_directories(backupPath, ec);
+    if (ec) return Err("Failed to create backup folder: {}", ec.message());
+
+    for (const auto& fileName : { StatsManager::FROM0_FILE_NAME, StatsManager::METADATA_FILE_NAME }) {
+        if (!std::filesystem::exists(levelPath / fileName, ec)) continue;
+
+        std::filesystem::copy_file(levelPath / fileName, backupPath / fileName, std::filesystem::copy_options::overwrite_existing, ec);
+        if (ec) return Err("Failed to back up {}: {}", fileName, ec.message());
+    }
+
+    auto sessionsPath = levelPath / StatsManager::SESSIONS_DIR_NAME;
+    if (std::filesystem::is_directory(sessionsPath, ec)) {
+        auto backupSessionsPath = backupPath / StatsManager::SESSIONS_DIR_NAME;
+        std::filesystem::create_directories(backupSessionsPath, ec);
+        if (ec) return Err("Failed to create backup sessions folder: {}", ec.message());
+
+        for (const auto& entry : std::filesystem::directory_iterator(sessionsPath, ec)) {
+            if (entry.is_directory()) continue;
+
+            std::filesystem::copy_file(entry.path(), backupSessionsPath / entry.path().filename(), std::filesystem::copy_options::overwrite_existing, ec);
+            if (ec) return Err("Failed to back up a session: {}", ec.message());
+        }
+    }
+
+    // respect the "Max Auto Backups" setting
+    auto maxBackups = Settings::getMaxBackupAmount();
+    if (maxBackups.has_value()) {
+        auto backups = getBackupsCount(levelKey);
+        while (backups.size() > static_cast<size_t>(maxBackups.value())) {
+            (void)deleteBackup(levelKey, *backups.begin());
+            backups.erase(backups.begin());
+        }
+    }
+
+    return Ok(backupName);
+}
+
 Result<> StatsManager::deleteAllSessions(const std::string& levelKey){
     auto levelSaveFilePath = getSavesFolderPath() / levelKey / StatsManager::SESSIONS_DIR_NAME;
 

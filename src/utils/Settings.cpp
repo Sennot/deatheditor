@@ -36,7 +36,46 @@ float Settings::getGraphPointSize(){
 }
 
 std::filesystem::path Settings::getSavePath(){
-    return Mod::get()->getSettingValue<std::filesystem::path>("save-path-new");
+    auto path = Mod::get()->getSettingValue<std::filesystem::path>("save-path-new");
+
+    if (!Mod::get()->getSettingValue<bool>("editor-share-original-saves")) return path;
+
+    // called for every file operation, so the folder check is cached per setting value
+    static std::filesystem::path lastInput;
+    static std::filesystem::path lastOutput;
+    if (!lastOutput.empty() && lastInput == path) return lastOutput;
+
+    auto result = path;
+    if (path.lexically_normal() == (Mod::get()->getSaveDir() / "levels").lexically_normal()) {
+        // the original Death Tracker keeps its data in a sibling folder named after its id
+        auto original = Mod::get()->getSaveDir().parent_path() / "elohmrow.death_tracker" / "levels";
+        std::error_code ec;
+        if (std::filesystem::is_directory(original, ec)) result = original;
+    }
+
+    lastInput = path;
+    lastOutput = result;
+    return result;
+}
+
+bool Settings::getEditorMode(){
+    return Mod::get()->getSettingValue<bool>("editor-mode");
+}
+
+bool Settings::getEditorLinkGdAttempts(){
+    return Mod::get()->getSettingValue<bool>("editor-link-gd-attempts");
+}
+
+bool Settings::getEditorSyncGdBest(){
+    return Mod::get()->getSettingValue<bool>("editor-sync-gd-best");
+}
+
+bool Settings::getEditorRunsCountAsAttempts(){
+    return Mod::get()->getSettingValue<bool>("editor-runs-count-as-attempts");
+}
+
+bool Settings::getEditorAutoBackup(){
+    return Mod::get()->getSettingValue<bool>("editor-auto-backup");
 }
 
 std::optional<int> Settings::getMaxBackupAmount(){

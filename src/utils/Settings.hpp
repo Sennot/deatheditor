@@ -23,4 +23,10 @@ public:
     static bool getCheatDetect();
     static bool getDisablePractice();
     static bool is12HourClockFormat();
+
+    static bool getEditorMode();
+    static bool getEditorLinkGdAttempts();
+    static bool getEditorSyncGdBest();
+    static bool getEditorRunsCountAsAttempts();
+    static bool getEditorAutoBackup();
 };
